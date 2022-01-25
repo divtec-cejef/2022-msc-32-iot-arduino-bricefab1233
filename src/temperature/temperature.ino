@@ -1,4 +1,3 @@
-
 #include "DHT.h"
 #include <arduino-timer.h>
 #include <SigFox.h>
@@ -8,65 +7,69 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
-const int buttonPin = 1;
 auto timer = timer_create_default();
+
+const int BUTTON_PIN = 1;
 int previousButtonState = 0;
-float h = 0;
-float t = 0;
 
-bool temperatureAffichage(void *)
-{  
-    Serial.print("Humidity: ");
-    Serial.print(h);
-    Serial.print(" %\t");
-    Serial.print("Temperature: ");
-    Serial.print(t);   
-    Serial.print(" *C \n");
+float humdity = 0;
+float temperature = 0;
 
-    SigFox.begin();
-    SigFox.beginPacket();
-    SigFox.write(t);
-    SigFox.write(h);
-    SigFox.endPacket();
-    SigFox.end();
+/**
+ * @brief Affcihe les températures dans la console,
+ * Envoie les données de températures et humidité à SigFox
+ */
+void showTemperature()
+{
+  Serial.print("Humidity: ");
+  Serial.print(h);
+  Serial.print(" %\t");
+  Serial.print("Temperature: ");
+  Serial.print(t);
+  Serial.print(" *C \n");
 
-    return true;
+  SigFox.begin();
+  SigFox.beginPacket();
+  SigFox.write(t);
+  SigFox.write(h);
+  SigFox.endPacket();
+  SigFox.end();
+}
+
+/**
+ * @brief Fonction qui est exécuté par le timer
+ */
+bool timerFunction(void *)
+{
+  showTemperature();
+  return true;
 }
 
 void setup()
 {
   // Toutes les 15 minutes la fonction est exécuté
-  timer.every(900000, temperatureAffichage);
+  timer.every(900000, timerFunction);
   Serial.begin(9600);
   Serial.println("DHTxx test!");
 
-  // initialize the pushbutton pin as an input:
-  pinMode(buttonPin, INPUT);
+  // initialise le bouton à une entrée
+  pinMode(BUTTON_PIN, INPUT);
 
   dht.begin();
 }
 
 void loop()
 {
-  h = dht.readHumidity();
-  t = dht.readTemperature();
+  //Initialise la variable à l'humidité capté par le capteur
+  humidity = dht.readHumidity();
+  //Initialise la variable à la température capté par le capteur
+  temperature = dht.readTemperature();
 
-  bool currentButtonState = digitalRead(buttonPin);
+  bool currentButtonState = digitalRead(BUTTON_PIN);
+  //Vérifie que le précédente valeur du bouton soit off et que la valeur actuel du bouton soit on
   if (previousButtonState != currentButtonState && currentButtonState == HIGH)
   {
-    Serial.print("Humidity: ");
-    Serial.print(h);
-    Serial.print(" %\t");
-    Serial.print("Temperature: ");
-    Serial.print(t);
-    Serial.print(" *C \n");
-
-    SigFox.begin();
-    SigFox.beginPacket();
-    SigFox.write(t);
-    SigFox.write(h);
-    SigFox.endPacket();
-    SigFox.end();
+    showTemperature();
   }
 
   timer.tick(); // tick the timer
