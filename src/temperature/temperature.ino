@@ -12,7 +12,7 @@ auto timer = timer_create_default();
 const int BUTTON_PIN = 1;
 int previousButtonState = 0;
 
-float humdity = 0;
+float humidity = 0;
 float temperature = 0;
 
 /**
@@ -22,16 +22,16 @@ float temperature = 0;
 void showTemperature()
 {
   Serial.print("Humidity: ");
-  Serial.print(h);
+  Serial.print(humidity);
   Serial.print(" %\t");
   Serial.print("Temperature: ");
-  Serial.print(t);
+  Serial.print(temperature);
   Serial.print(" *C \n");
 
   SigFox.begin();
   SigFox.beginPacket();
-  SigFox.write(t);
-  SigFox.write(h);
+  SigFox.write(humidity);
+  SigFox.write(temperature);
   SigFox.endPacket();
   SigFox.end();
 }
