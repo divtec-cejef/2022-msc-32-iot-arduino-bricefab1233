@@ -1,3 +1,4 @@
+
 #include "DHT.h"
 #include <arduino-timer.h>
 #include <SigFox.h>
@@ -19,21 +20,23 @@ bool temperatureAffichage(void *)
     Serial.print(h);
     Serial.print(" %\t");
     Serial.print("Temperature: ");
-    Serial.print(t);
+    Serial.print(t);   
     Serial.print(" *C \n");
 
-  SigFox.begin();
-  SigFox.beginPacket();
-  SigFox.print(t);
-  SigFox.print(h);
-  SigFox.endPacket();
-    
-  return true;
+    SigFox.begin();
+    SigFox.beginPacket();
+    SigFox.write(t);
+    SigFox.write(h);
+    SigFox.endPacket();
+    SigFox.end();
+
+    return true;
 }
 
 void setup()
 {
-  timer.every(10000, temperatureAffichage);
+  // Toutes les 15 minutes la fonction est exécuté
+  timer.every(900000, temperatureAffichage);
   Serial.begin(9600);
   Serial.println("DHTxx test!");
 
@@ -57,6 +60,13 @@ void loop()
     Serial.print("Temperature: ");
     Serial.print(t);
     Serial.print(" *C \n");
+
+    SigFox.begin();
+    SigFox.beginPacket();
+    SigFox.write(t);
+    SigFox.write(h);
+    SigFox.endPacket();
+    SigFox.end();
   }
 
   timer.tick(); // tick the timer
