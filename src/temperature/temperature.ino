@@ -21,6 +21,13 @@ float temperature = 0;
  */
 void showTemperature()
 {
+
+  //Initialise la variable à l'humidité capté par le capteur
+  humidity = dht.readHumidity();
+  //Initialise la variable à la température capté par le capteur
+  temperature = dht.readTemperature();
+  temperature -= 1;
+  
   Serial.print("Humidity: ");
   Serial.print(humidity);
   Serial.print(" %\t");
@@ -60,11 +67,6 @@ void setup()
 
 void loop()
 {
-  //Initialise la variable à l'humidité capté par le capteur
-  humidity = dht.readHumidity();
-  //Initialise la variable à la température capté par le capteur
-  temperature = dht.readTemperature();
-
   bool currentButtonState = digitalRead(BUTTON_PIN);
   //Vérifie que le précédente valeur du bouton soit off et que la valeur actuel du bouton soit on
   if (previousButtonState != currentButtonState && currentButtonState == HIGH)
