@@ -15,7 +15,7 @@ float humidity = 0;
 float temperature = 0;
 
 /**
- * @brief Affcihe les températures dans la console,
+ * Affcihe les températures dans la console,
  * Envoie les données de températures et humidité à SigFox
  */
 void showTemperature() {
