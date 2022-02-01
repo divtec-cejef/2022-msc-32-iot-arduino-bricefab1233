@@ -1,13 +1,12 @@
 #include "DHT.h"
-#include <arduino-timer.h>
+#include "timer.h"
 #include <SigFox.h>
 #include <ArduinoLowPower.h>
 #define DHTPIN 5
 #define DHTTYPE DHT11
 
 DHT dht(DHTPIN, DHTTYPE);
-
-auto timer = timer_create_default();
+Timer timer;
 
 const int BUTTON_PIN = 1;
 int previousButtonState = 0;
@@ -19,8 +18,7 @@ float temperature = 0;
  * @brief Affcihe les températures dans la console,
  * Envoie les données de températures et humidité à SigFox
  */
-void showTemperature()
-{
+void showTemperature() {
 
   //Initialise la variable à l'humidité capté par le capteur
   humidity = dht.readHumidity();
@@ -43,21 +41,13 @@ void showTemperature()
   SigFox.end();
 }
 
-/**
- * @brief Fonction qui est exécuté par le timer
- */
-bool timerFunction(void *)
-{
-  showTemperature();
-  return true;
-}
-
-void setup()
-{
-  // Toutes les 15 minutes la fonction est exécuté
-  timer.every(900000, timerFunction);
+void setup() {
   Serial.begin(9600);
-  Serial.println("DHTxx test!");
+
+  //Initialisation du timer toutes les 15 minutes 
+  timer.setInterval(9000000);
+  timer.setCallback(showTemperature);
+  timer.start();
 
   // initialise le bouton à une entrée
   pinMode(BUTTON_PIN, INPUT);
@@ -65,15 +55,13 @@ void setup()
   dht.begin();
 }
 
-void loop()
-{
+void loop() {
   bool currentButtonState = digitalRead(BUTTON_PIN);
   //Vérifie que le précédente valeur du bouton soit off et que la valeur actuel du bouton soit on
-  if (previousButtonState != currentButtonState && currentButtonState == HIGH)
-  {
+  if (previousButtonState != currentButtonState && currentButtonState == HIGH) {
     showTemperature();
   }
-
-  timer.tick(); // tick the timer
   previousButtonState = currentButtonState;
+
+  timer.update(); // update the timer
 }
